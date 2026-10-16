@@ -63,9 +63,10 @@ export default function ProjectsSection({ onSelectProject }) {
 
       {/* Projects Grid */}
       <div
+        className="responsive-projects-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(340px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
           gap: '32px'
         }}
       >

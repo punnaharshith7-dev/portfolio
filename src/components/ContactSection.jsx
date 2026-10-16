@@ -49,9 +49,10 @@ export default function ContactSection() {
       </div>
 
       <div
+        className="responsive-contact-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
           gap: '40px'
         }}
       >

@@ -24,7 +24,7 @@ export default function ProjectModal({ project, onClose }) {
       onClick={onClose}
     >
       <div
-        className="glass-card"
+        className="glass-card project-modal-card"
         style={{
           width: '100%',
           maxWidth: '680px',

@@ -39,8 +39,7 @@ export default function CanvasCharacter() {
       };
     }
 
-    // 2. Preload & asynchronous GPU pre-decode all 64 directional frames
-    // This completely eliminates the first-turn decode lag/stutter
+    // 2. Preload & GPU pre-decode all 64 directional frames
     for (let i = 0; i < TOTAL_FRAMES; i++) {
       const img = new Image();
       const idxStr = String(i).padStart(2, '0');
@@ -58,7 +57,7 @@ export default function CanvasCharacter() {
       }
     }
 
-    // Balanced DPR for crisp rendering with maximum GPU efficiency (60-120 FPS)
+    // DPR handling capped at 1.25 for crisp rendering with maximum 60-120 FPS performance
     let dpr = Math.min(window.devicePixelRatio || 1, 1.25);
     let viewW = window.innerWidth;
     let viewH = window.innerHeight;
@@ -98,18 +97,26 @@ export default function CanvasCharacter() {
       }
     };
 
+    const handleTouchEnd = () => {
+      const isMobile = viewW < 640;
+      targetX = viewW / 2;
+      targetY = viewH * (isMobile ? 0.35 : 0.46);
+    };
+
     const handleOrientation = (e) => {
       if (e.gamma !== null && e.beta !== null) {
-        const tiltX = (e.gamma / 40) * (viewW * 0.45);
-        const tiltY = ((e.beta - 40) / 40) * (viewH * 0.45);
+        const isMobile = viewW < 640;
+        const tiltX = (e.gamma / 30) * (viewW * 0.4);
+        const tiltY = ((e.beta - 45) / 30) * (viewH * 0.3);
         targetX = viewW / 2 + tiltX;
-        targetY = viewH / 2 + tiltY;
+        targetY = (viewH * (isMobile ? 0.35 : 0.46)) + tiltY;
       }
     };
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true });
     window.addEventListener('touchmove', handleTouchMove, { passive: true });
     window.addEventListener('touchstart', handleTouchMove, { passive: true });
+    window.addEventListener('touchend', handleTouchEnd, { passive: true });
     if (window.DeviceOrientationEvent) {
       window.addEventListener('deviceorientation', handleOrientation, { passive: true });
     }
@@ -123,20 +130,22 @@ export default function CanvasCharacter() {
       const dt = Math.min((time - lastTime) / 1000, 0.1);
       lastTime = time;
 
-      // Smooth cursor coordinate interpolation (silky smooth trailing)
+      const isMobile = viewW < 640;
+
+      // Smooth coordinate interpolation
       const coordLerpFactor = 1 - Math.exp(-18 * dt);
       smoothX += (targetX - smoothX) * coordLerpFactor;
       smoothY += (targetY - smoothY) * coordLerpFactor;
 
-      // Face center position
+      // Face center position (adjusted on mobile so head is in the upper 35% of screen)
       const faceCenterX = viewW / 2;
-      const faceCenterY = viewH * 0.46;
+      const faceCenterY = viewH * (isMobile ? 0.35 : 0.46);
 
       const dx = smoothX - faceCenterX;
       const dy = smoothY - faceCenterY;
       const distance = Math.hypot(dx, dy);
 
-      // Deadzone with hysteresis to prevent edge jitter/flashing
+      // Deadzone with hysteresis to prevent edge jitter
       const baseDeadzone = Math.min(viewW, viewH) * 0.11;
       const enterDeadzone = baseDeadzone * 0.75;
       const exitDeadzone = baseDeadzone * 1.15;
@@ -157,7 +166,7 @@ export default function CanvasCharacter() {
         targetAngle = angle;
       }
 
-      // Smooth circular angle lerp with time-corrected dampening
+      // Smooth circular angle lerp
       const angleLerpFactor = 1 - Math.exp(-14 * dt);
       currentAngle = lerpAngle(currentAngle, targetAngle, angleLerpFactor);
 
@@ -182,7 +191,7 @@ export default function CanvasCharacter() {
         activeImage = lastDrawnImage;
       }
 
-      // Only perform costly canvas redraw if active image changed or resize occurred
+      // Redraw only when frame actually changes or on resize
       if (activeImage && (activeImage !== lastDrawnImage || needsRedraw)) {
         lastDrawnImage = activeImage;
         needsRedraw = false;
@@ -193,15 +202,29 @@ export default function CanvasCharacter() {
         ctx.fillStyle = '#a41916';
         ctx.fillRect(0, 0, viewW, viewH);
 
-        // Draw image centered & scaled to cover nicely
         const imgW = activeImage.naturalWidth;
         const imgH = activeImage.naturalHeight;
 
-        const scale = Math.max(viewW / imgW, viewH / imgH);
-        const renderW = imgW * scale;
-        const renderH = imgH * scale;
-        const renderX = (viewW - renderW) / 2;
-        const renderY = (viewH - renderH) / 2;
+        // Mobile vs desktop scaling: on mobile portrait, keep the head nicely sized in upper viewport
+        let scale;
+        let renderW;
+        let renderH;
+        let renderX;
+        let renderY;
+
+        if (isMobile) {
+          scale = Math.max(viewW / imgW, (viewH * 0.78) / imgH);
+          renderW = imgW * scale;
+          renderH = imgH * scale;
+          renderX = (viewW - renderW) / 2;
+          renderY = Math.min(viewH * 0.04, 30);
+        } else {
+          scale = Math.max(viewW / imgW, viewH / imgH);
+          renderW = imgW * scale;
+          renderH = imgH * scale;
+          renderX = (viewW - renderW) / 2;
+          renderY = (viewH - renderH) / 2;
+        }
 
         ctx.imageSmoothingEnabled = true;
         ctx.imageSmoothingQuality = 'high';
@@ -216,6 +239,7 @@ export default function CanvasCharacter() {
       window.removeEventListener('mousemove', handleMouseMove);
       window.removeEventListener('touchmove', handleTouchMove);
       window.removeEventListener('touchstart', handleTouchMove);
+      window.removeEventListener('touchend', handleTouchEnd);
       window.removeEventListener('deviceorientation', handleOrientation);
       cancelAnimationFrame(animId);
     };

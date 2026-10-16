@@ -29,9 +29,10 @@ export default function AboutSection() {
       </div>
 
       <div
+        className="responsive-about-grid"
         style={{
           display: 'grid',
-          gridTemplateColumns: 'repeat(auto-fit, minmax(320px, 1fr))',
+          gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 320px), 1fr))',
           gap: '40px',
           alignItems: 'start'
         }}
@@ -71,6 +72,7 @@ export default function AboutSection() {
 
           {/* Stats Grid */}
           <div
+            className="stats-grid"
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(2, 1fr)',

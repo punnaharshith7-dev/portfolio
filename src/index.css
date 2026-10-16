@@ -13,15 +13,19 @@
   margin: 0;
   padding: 0;
   box-sizing: border-box;
+  -webkit-tap-highlight-color: transparent;
 }
 
 html {
   scroll-behavior: smooth;
+  overflow-x: hidden;
+  width: 100%;
 }
 
 body {
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   overflow-x: hidden;
   background-color: var(--bg-color);
   color: var(--text-primary);
@@ -30,20 +34,33 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* On desktops with fine pointer, use custom glowing cursor */
-@media (pointer: fine) {
+/* Mouse cursor handling: only activate custom cursor on fine pointers (desktop mouse) */
+@media (hover: hover) and (pointer: fine) {
   html, body, a, button, input, textarea {
     cursor: none;
+  }
+}
+
+/* On mobile / Android / touch screens: completely hide custom cursor elements */
+@media (hover: none) or (pointer: coarse) {
+  .custom-cursor-dot,
+  .custom-cursor-ring {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
   }
 }
 
 #root {
   width: 100%;
   min-height: 100vh;
+  min-height: 100dvh;
   position: relative;
+  overflow-x: hidden;
 }
 
-/* Custom Magnetic Cursor */
+/* Custom Magnetic Cursor (Desktop only) */
 .custom-cursor-dot {
   position: fixed;
   top: 0;
@@ -96,7 +113,6 @@ body {
 .glass-pill:hover {
   background: rgba(255, 255, 255, 0.14);
   border-color: rgba(255, 255, 255, 0.3);
-  transform: translateY(-2px);
 }
 
 .glass-card {
@@ -122,8 +138,8 @@ body {
 /* Scroll Reveal & Smooth Transition System */
 .reveal {
   opacity: 0;
-  transform: translateY(34px);
-  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(30px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 
@@ -134,8 +150,8 @@ body {
 
 .reveal-scale {
   opacity: 0;
-  transform: scale(0.94) translateY(24px);
-  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: scale(0.95) translateY(20px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 
@@ -146,8 +162,8 @@ body {
 
 .reveal-left {
   opacity: 0;
-  transform: translateX(-40px);
-  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateX(-30px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 
@@ -158,8 +174,8 @@ body {
 
 .reveal-right {
   opacity: 0;
-  transform: translateX(40px);
-  transition: opacity 0.85s cubic-bezier(0.16, 1, 0.3, 1), transform 0.85s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateX(30px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
   will-change: opacity, transform;
 }
 
@@ -202,22 +218,126 @@ body {
   animation: bounceSlow 2s infinite ease-in-out;
 }
 
-/* Responsiveness */
+/* Responsiveness - Desktop status badge */
 @media (min-width: 768px) {
   #status-badge {
     display: flex !important;
   }
 }
 
+/* ============================================================
+   MOBILE & ANDROID OPTIMIZATIONS (Screen width <= 640px)
+   ============================================================ */
 @media (max-width: 640px) {
+  /* Prevent any accidental horizontal scroll */
+  body, html, #root {
+    overflow-x: hidden !important;
+    width: 100% !important;
+    position: relative;
+  }
+
+  /* Compact section paddings on mobile */
+  section {
+    padding: 72px 18px !important;
+  }
+
+  #hero {
+    height: 100dvh !important;
+    height: 100vh;
+  }
+
+  /* Hero Typography & Mobile Layout */
+  #hero-text-container {
+    left: 20px !important;
+    right: 20px !important;
+    bottom: 24px !important;
+    max-width: calc(100vw - 40px) !important;
+  }
+
   #hero h1 {
-    font-size: 50px !important;
+    font-size: clamp(42px, 11vw, 56px) !important;
+    line-height: 1.1 !important;
+    margin-bottom: 6px !important;
   }
-  #hero div[style*="left: 48px"] {
-    left: 24px !important;
-    bottom: 28px !important;
+
+  #hero-role-title {
+    font-size: 11.5px !important;
+    margin-bottom: 10px !important;
+    letter-spacing: 0.08em !important;
   }
+
+  #hero-bio {
+    font-size: 13.5px !important;
+    line-height: 1.55 !important;
+    margin-bottom: 20px !important;
+    max-width: 100% !important;
+  }
+
+  /* Hide bottom-right explore button on mobile to give room to hero buttons */
   #hero div[style*="right: 48px"] {
     display: none !important;
+  }
+
+  /* Floating Navbar on Mobile/Android */
+  header.nav-header {
+    top: 12px !important;
+    width: calc(100% - 24px) !important;
+    max-width: 390px !important;
+    justify-content: center !important;
+  }
+
+  header.nav-header nav {
+    width: 100% !important;
+    justify-content: space-between !important;
+    padding: 4px 6px !important;
+    gap: 0 !important;
+  }
+
+  header.nav-header nav button {
+    padding: 6px 9px !important;
+    font-size: 11px !important;
+    letter-spacing: 0.04em !important;
+  }
+
+  /* Cards padding on mobile */
+  .glass-card {
+    padding: 24px 18px !important;
+    border-radius: 20px !important;
+  }
+
+  /* Grid containers on mobile: single clean column */
+  .responsive-projects-grid,
+  .responsive-tech-grid,
+  .responsive-about-grid,
+  .responsive-contact-grid {
+    grid-template-columns: 1fr !important;
+    gap: 24px !important;
+  }
+
+  /* Stats cards on mobile */
+  .stats-grid {
+    gap: 10px !important;
+  }
+
+  .stats-grid > div {
+    padding: 18px 12px !important;
+  }
+
+  /* Modal on mobile */
+  .project-modal-card {
+    padding: 24px 18px !important;
+    border-radius: 20px !important;
+    max-height: 92dvh !important;
+  }
+
+  /* Form inputs & buttons touch targets */
+  input, textarea, button {
+    font-size: 14px !important;
+  }
+
+  /* Section Titles on Mobile */
+  h2 {
+    font-size: 28px !important;
+    line-height: 1.2 !important;
   }
 }

@@ -35,6 +35,7 @@ export default function Navbar() {
 
   return (
     <header
+      className="nav-header"
       style={{
         position: 'fixed',
         top: '24px',

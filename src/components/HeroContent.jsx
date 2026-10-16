@@ -26,6 +26,7 @@ export default function HeroContent() {
   return (
     <>
       <div
+        id="hero-text-container"
         style={{
           position: 'absolute',
           bottom: '48px',
@@ -69,6 +70,7 @@ export default function HeroContent() {
 
         {/* Role title */}
         <p
+          id="hero-role-title"
           style={{
             fontSize: '13px',
             fontWeight: 600,
@@ -84,6 +86,7 @@ export default function HeroContent() {
 
         {/* Compact bio */}
         <p
+          id="hero-bio"
           style={{
             fontSize: '15px',
             lineHeight: 1.65,
